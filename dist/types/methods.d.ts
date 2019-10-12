@@ -1,0 +1,9 @@
+declare enum methods {
+    GET = "GET",
+    POST = "POST",
+    HEAD = "HEAD",
+    PUT = "PUT",
+    PATCH = "PATCH",
+    DELETE = "DELETE"
+}
+export default methods;
