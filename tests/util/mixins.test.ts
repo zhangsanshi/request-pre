@@ -47,13 +47,11 @@ caseBase({
             },
         },
         requestObj: {
-            url: {
-                path: {
-                    id: 1,
-                },
-                query: {
-                    b: 2,
-                },
+            path: {
+                id: 1,
+            },
+            query: {
+                b: 2,
             },
             config: {
                 mock: 'listSuccess',
@@ -103,10 +101,8 @@ caseBase({
             },
         },
         requestObj: {
-            url: {
-                path: {
-                    id: 1,
-                },
+            path: {
+                id: 1,
             },
         },
     },
@@ -142,10 +138,8 @@ caseBase({
             },
         },
         requestObj: {
-            url: {
-                path: {
-                    id: 1,
-                },
+            path: {
+                id: 1,
             },
         },
     },
@@ -181,13 +175,11 @@ caseBase({
             },
         },
         requestObj: {
-            url: {
-                path: {
-                    id: 1,
-                },
-                body: {
-                    username: 'test',
-                },
+            path: {
+                id: 1,
+            },
+            body: {
+                username: 'test',
             },
         },
     },

@@ -14,12 +14,14 @@ var Service = /** @class */ (function () {
             var config = requestInfo.config, mock = requestInfo.mock;
             var mockStatus = config && config.mock;
             var mockInfo = mockStatus && mock && mock[mockStatus];
-            if (process.env.NODE_ENV === 'development' && mockInfo) {
-                console.log(requestInfo);
-                return new Promise(function (res, rej) {
-                    var action = mockInfo.success ? res : rej;
-                    action(mockInfo.data);
-                });
+            if (process.env.NODE_ENV === 'development') {
+                if (mockInfo) {
+                    console.log(requestInfo);
+                    return new Promise(function (res, rej) {
+                        var action = mockInfo.success ? res : rej;
+                        action(typeof mockInfo.data === 'function' ? mockInfo.data(config) : mockInfo.data);
+                    });
+                }
             }
             return target.requester(requestInfo);
         };

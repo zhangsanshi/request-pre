@@ -13,7 +13,7 @@ const apiSchemaList = {
         mock: {
             'list.success': {
                 success: true,
-                data: [],
+                data: () => [],
             },
             'list.fail': {
                 success: false,
@@ -57,7 +57,7 @@ test('process.env.NODE_ENV=development & mock', () => {
             mock: 'list.success',
         },
     }).then((data) => {
-        expect(data).toBe(apiSchemaList.list.mock["list.success"].data);
+        expect(data).toStrictEqual(apiSchemaList.list.mock["list.success"].data());
     });
     service.list({
         config: {
@@ -71,7 +71,7 @@ test('process.env.NODE_ENV=development & mock', () => {
             mock: 'list.success',
         },
     }).then((data) => {
-        expect(data).toBe(apiSchemaList.list.mock["list.success"].data);
+        expect(data).toStrictEqual(apiSchemaList.list.mock["list.success"].data());
     });
 });
 
@@ -136,7 +136,7 @@ test('[no Proxy]process.env.NODE_ENV=development & mock', () => {
             mock: 'list.success',
         },
     }).then((data) => {
-        expect(data).toBe(apiSchemaList.list.mock["list.success"].data);
+        expect(data).toStrictEqual(apiSchemaList.list.mock["list.success"].data());
     });
     service2.list({
         config: {
@@ -150,6 +150,6 @@ test('[no Proxy]process.env.NODE_ENV=development & mock', () => {
             mock: 'list.success',
         },
     }).then((data) => {
-        expect(data).toBe(apiSchemaList.list.mock["list.success"].data);
+        expect(data).toStrictEqual(apiSchemaList.list.mock["list.success"].data());
     });
 });

@@ -1,19 +1,17 @@
 const service = require('./services');
 service.list({
-    url: {
-        path: {
-            id: 2,
-        },
-        query: {
-            status: 4,
-        },
-        body: {
-            xx: 2,
-        },
-        headers: {
-            'x-option': 'custom',
-            'Content-Type': 'application/x-www-form-urlencoded'
-        },
+    path: {
+        id: 2,
+    },
+    query: {
+        status: 4,
+    },
+    body: {
+        xx: 2,
+    },
+    headers: {
+        'x-option': 'custom',
+        'Content-Type': 'application/x-www-form-urlencoded'
     },
     config: {
         mock: 'list.success',

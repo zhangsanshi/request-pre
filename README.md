@@ -91,7 +91,7 @@ export default {
         mock: {
             'list.success': {
                 success: true,
-                data: [],
+                data: [], // or () => [],
             },
         },
     },
@@ -102,20 +102,18 @@ export default {
 // case
 import service from '../services';
 services.list({
-    url: {
-        path: {
-            id: 2,
-        },
-        query: {
-            status: 4,
-        },
-        body: {
-            xx: 2,
-        },
-        headers: {
-            'x-option': 'custom',
-            'Content-Type': 'application/x-www-form-urlencoded'
-        },
+    path: {
+        id: 2,
+    },
+    query: {
+        status: 4,
+    },
+    body: {
+        xx: 2,
+    },
+    headers: {
+        'x-option': 'custom',
+        'Content-Type': 'application/x-www-form-urlencoded'
     },
     config: {
         mock: 'list.success',

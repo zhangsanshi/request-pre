@@ -6,7 +6,6 @@ export default function mixins(serviceConfig: ServiceConfig, apiSchema: ApiSchem
     const apiSchemaURL = apiSchema.url;
     requestObj = requestObj || {};
     serviceConfig = serviceConfig || {};
-    const requestObjURL: ApiSchemaData["url"] = requestObj.url = requestObj.url || {};
     const apiSchemaURLInfo = {
         ...apiSchemaURL,
     };
@@ -23,29 +22,34 @@ export default function mixins(serviceConfig: ServiceConfig, apiSchema: ApiSchem
     if (apiSchema.mock || requestObj.mock) {
         apiSchemaInfo.mock = apiSchema.mock;
     }
-    if (requestObjURL.path) {
-        apiSchemaURLInfo.path = resolvePath(apiSchemaURL.path, requestObjURL.path);
+    if (requestObj.path) {
+        apiSchemaURLInfo.path = resolvePath(apiSchemaURL.path, requestObj.path);
     }
     if (serviceConfig.prefix) {
         apiSchemaURLInfo.path = serviceConfig.prefix + apiSchemaURLInfo.path;
     }
-    if ((apiSchemaURL.body || requestObjURL.body) && bodyMethods.includes(apiSchemaURLInfo.method)) {
+    if ((apiSchemaURL.body || requestObj.body)) {
         apiSchemaURLInfo.body = {
             ...apiSchemaURL.body, 
-            ...requestObjURL.body,
+            ...requestObj.body,
         };
+        if (process.env.NODE_ENV === 'development') {
+            if (!bodyMethods.includes(apiSchemaURLInfo.method)) {
+                console.warn('HTTP methods like post,patch,put require a body.');
+            }
+        }
     }
-    if (apiSchemaURL.query || requestObjURL.query) {
+    if (apiSchemaURL.query || requestObj.query) {
         apiSchemaURLInfo.query = {
             ...apiSchemaURL.query, 
-            ...requestObjURL.query,
+            ...requestObj.query,
         };
     }
-    if (apiSchemaURL.headers || requestObjURL.headers || serviceConfig.headers) {
+    if (apiSchemaURL.headers || requestObj.headers || serviceConfig.headers) {
         apiSchemaURLInfo.headers = {
             ...serviceConfig.headers,
             ...apiSchemaURL.headers, 
-            ...requestObjURL.headers,
+            ...requestObj.headers,
         };
     }
     return apiSchemaInfo;

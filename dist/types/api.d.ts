@@ -33,8 +33,7 @@ export interface ServiceConfig {
     headers?: DefaultData;
     config?: ApiSchemaConfig;
 }
-export interface ApiSchemaData {
-    url?: UrlSchemaData;
+export interface ApiSchemaData extends UrlSchemaData {
     config?: ApiSchemaConfig;
     mock?: ApiSchemaMock;
 }

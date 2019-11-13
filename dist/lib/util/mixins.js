@@ -18,7 +18,6 @@ function mixins(serviceConfig, apiSchema, requestObj) {
     var apiSchemaURL = apiSchema.url;
     requestObj = requestObj || {};
     serviceConfig = serviceConfig || {};
-    var requestObjURL = requestObj.url = requestObj.url || {};
     var apiSchemaURLInfo = __assign({}, apiSchemaURL);
     var apiSchemaInfo = {
         url: apiSchemaURLInfo,
@@ -29,20 +28,25 @@ function mixins(serviceConfig, apiSchema, requestObj) {
     if (apiSchema.mock || requestObj.mock) {
         apiSchemaInfo.mock = apiSchema.mock;
     }
-    if (requestObjURL.path) {
-        apiSchemaURLInfo.path = utils_1.resolvePath(apiSchemaURL.path, requestObjURL.path);
+    if (requestObj.path) {
+        apiSchemaURLInfo.path = utils_1.resolvePath(apiSchemaURL.path, requestObj.path);
     }
     if (serviceConfig.prefix) {
         apiSchemaURLInfo.path = serviceConfig.prefix + apiSchemaURLInfo.path;
     }
-    if ((apiSchemaURL.body || requestObjURL.body) && bodyMethods.includes(apiSchemaURLInfo.method)) {
-        apiSchemaURLInfo.body = __assign({}, apiSchemaURL.body, requestObjURL.body);
+    if ((apiSchemaURL.body || requestObj.body)) {
+        apiSchemaURLInfo.body = __assign({}, apiSchemaURL.body, requestObj.body);
+        if (process.env.NODE_ENV === 'development') {
+            if (!bodyMethods.includes(apiSchemaURLInfo.method)) {
+                console.warn('HTTP methods like post,patch,put require a body.');
+            }
+        }
     }
-    if (apiSchemaURL.query || requestObjURL.query) {
-        apiSchemaURLInfo.query = __assign({}, apiSchemaURL.query, requestObjURL.query);
+    if (apiSchemaURL.query || requestObj.query) {
+        apiSchemaURLInfo.query = __assign({}, apiSchemaURL.query, requestObj.query);
     }
-    if (apiSchemaURL.headers || requestObjURL.headers || serviceConfig.headers) {
-        apiSchemaURLInfo.headers = __assign({}, serviceConfig.headers, apiSchemaURL.headers, requestObjURL.headers);
+    if (apiSchemaURL.headers || requestObj.headers || serviceConfig.headers) {
+        apiSchemaURLInfo.headers = __assign({}, serviceConfig.headers, apiSchemaURL.headers, requestObj.headers);
     }
     return apiSchemaInfo;
 }

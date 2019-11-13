@@ -25,12 +25,14 @@ class Service {
             const { config, mock } = requestInfo;
             const mockStatus = config && config.mock;
             const mockInfo = mockStatus && mock && mock[mockStatus];
-            if (process.env.NODE_ENV === 'development' && mockInfo) {
-                console.log(requestInfo);
-                return new Promise((res, rej): void => {
-                    const action = mockInfo.success ? res : rej;
-                    action(mockInfo.data);
-                });
+            if (process.env.NODE_ENV === 'development') {
+                if (mockInfo) {
+                    console.log(requestInfo);
+                    return new Promise((res, rej): void => {
+                        const action = mockInfo.success ? res : rej;
+                        action(typeof mockInfo.data === 'function' ? mockInfo.data(config) : mockInfo.data);
+                    });
+                }
             }
             return target.requester(requestInfo);
         };

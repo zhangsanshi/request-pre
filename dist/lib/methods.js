@@ -8,5 +8,6 @@ var methods;
     methods["PUT"] = "PUT";
     methods["PATCH"] = "PATCH";
     methods["DELETE"] = "DELETE";
+    methods["OPTIONS"] = "OPTIONS";
 })(methods || (methods = {}));
 exports.default = methods;

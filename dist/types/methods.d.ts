@@ -4,6 +4,7 @@ declare enum methods {
     HEAD = "HEAD",
     PUT = "PUT",
     PATCH = "PATCH",
-    DELETE = "DELETE"
+    DELETE = "DELETE",
+    OPTIONS = "OPTIONS"
 }
 export default methods;
