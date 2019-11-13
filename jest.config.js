@@ -4,5 +4,6 @@ module.exports = {
         '^.+\\.ts?$': 'ts-jest'
     },
     testRegex: '/tests/.*\\.test\\.ts$',
+    setupFilesAfterEnv: ["<rootDir>/tests/setup.js"],
     coverageReporters: ['html'],
 };
