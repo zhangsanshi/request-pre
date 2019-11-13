@@ -1,6 +1,6 @@
 {
   "name": "request-pre",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "process format data before request send",
   "scripts": {
     "test": "jest",
