@@ -1,10 +1,10 @@
 import mixins from '../../src/util/mixins';
-const caseBase = function(caseInfo) {
+const caseBase = function(caseInfo): void {
     test(`mixins(
         ${JSON.stringify(caseInfo.input.serviceConfig)},
         ${JSON.stringify(caseInfo.input.apiSchema)},
         ${JSON.stringify(caseInfo.input.requestObj)}
-    )`, () => {
+    )`, (): void => {
         expect(mixins(caseInfo.input.serviceConfig, caseInfo.input.apiSchema, caseInfo.input.requestObj)).toStrictEqual(caseInfo.output);
     });
 };

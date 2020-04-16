@@ -39,7 +39,7 @@ class Service {
     }
     private initService(): Service {
         const { apiSchemaList } = this;
-        if (!Proxy) {
+        if (typeof Proxy === 'undefined') {
             Object.keys(apiSchemaList).forEach((apiName): void => {
                 this[apiName] = this['$' + apiName] = this.createRequest(apiName, this);
             });

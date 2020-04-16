@@ -29,7 +29,7 @@ var Service = /** @class */ (function () {
     Service.prototype.initService = function () {
         var _this = this;
         var apiSchemaList = this.apiSchemaList;
-        if (!Proxy) {
+        if (typeof Proxy === 'undefined') {
             Object.keys(apiSchemaList).forEach(function (apiName) {
                 _this[apiName] = _this['$' + apiName] = _this.createRequest(apiName, _this);
             });

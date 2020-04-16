@@ -1,6 +1,6 @@
 import { resolvePath } from '../../src/util/utils';
-const caseBase = function(caseInfo) {
-    test(`resolvePath(${caseInfo.input}, ${JSON.stringify(caseInfo.config, null, 4)})`, () => {
+const caseBase = function(caseInfo): void {
+    test(`resolvePath(${caseInfo.input}, ${JSON.stringify(caseInfo.config, null, 4)})`, (): void => {
         expect(resolvePath(caseInfo.input, caseInfo.config)).toBe(caseInfo.output);
     });
 };

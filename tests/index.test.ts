@@ -40,48 +40,48 @@ const serviceConfig = {
         'Content-Type': 'application/x-www-form-urlencoded'
     },
 };
-const service = new Service(apiSchemaList, serviceConfig, function ({ config, url, mock }) {
+const service = new Service(apiSchemaList, serviceConfig, function ({ config, url, mock }): Promise<any> {
     return Promise.resolve({
         config, url, mock
     });
 });
 const path =  serviceConfig.prefix + apiSchemaList.detail.url.path;
-test('instanceof Service', () => {
+test('instanceof Service', (): void => {
     expect(service instanceof Service).toBe(true);
 });
 
-test('process.env.NODE_ENV=development & mock', () => {
+test('process.env.NODE_ENV=development & mock', (): void => {
     process.env.NODE_ENV = 'development';
     service.list({
         config: {
             mock: 'list.success',
         },
-    }).then((data) => {
+    }).then((data): void => {
         expect(data).toStrictEqual(apiSchemaList.list.mock["list.success"].data());
     });
     service.list({
         config: {
             mock: 'list.fail',
         },
-    }).catch((data) => {
+    }).catch((data): void => {
         expect(data).toBe(apiSchemaList.list.mock["list.fail"].data);
     });
     service.$list({
         config: {
             mock: 'list.success',
         },
-    }).then((data) => {
+    }).then((data): void => {
         expect(data).toStrictEqual(apiSchemaList.list.mock["list.success"].data());
     });
 });
 
-test('process.env.NODE_ENV=production', () => {
+test('process.env.NODE_ENV=production', (): void => {
     process.env.NODE_ENV = 'production';
     service.list({
         config: {
             mock: 'list.success',
         },
-    }).then(({ config, url, mock }) => {
+    }).then(({ config, url, mock }): void => {
         expect(mock).toStrictEqual(apiSchemaList.list.mock);
         expect({
             ...apiSchemaList.list.url,
@@ -93,7 +93,7 @@ test('process.env.NODE_ENV=production', () => {
         config: {
             mock: 'list.success',
         },
-    }).then(({ config, url, mock }) => {
+    }).then(({ config, url, mock }): void => {
         expect(url).toStrictEqual({
             ...apiSchemaList.detail.url,
             headers: serviceConfig.headers,
@@ -102,7 +102,7 @@ test('process.env.NODE_ENV=production', () => {
     });
 });
 
-test('reset request method', () => {
+test('reset request method', (): void => {
     service.list = function (...args) {
         return service.$list(...args);
     };
@@ -110,7 +110,7 @@ test('reset request method', () => {
         config: {
             mock: 'list.success',
         },
-    }).then(({ config, url, mock }) => {
+    }).then(({ config, url, mock }): void => {
         expect(mock).toStrictEqual(apiSchemaList.list.mock);
         expect({
             ...apiSchemaList.list.url,
@@ -118,38 +118,39 @@ test('reset request method', () => {
             path,
         }).toStrictEqual(url);
     });
-    expect(() => {
+    expect((): void => {
         service.$list = 'test';
     }).toThrow();
 });
 
-Proxy = null;
-const service2 = new Service(apiSchemaList, serviceConfig, function ({ config, url, mock }) {
-    return Promise.resolve({
-        config, url, mock
+
+test('[no Proxy]process.env.NODE_ENV=development & mock', (): void => {
+    Proxy = undefined;
+    const service2 = new Service(apiSchemaList, serviceConfig, function ({ config, url, mock }): Promise<any> {
+        return Promise.resolve({
+            config, url, mock
+        });
     });
-});
-test('[no Proxy]process.env.NODE_ENV=development & mock', () => {
     process.env.NODE_ENV = 'development';
     service2.list({
         config: {
             mock: 'list.success',
         },
-    }).then((data) => {
+    }).then((data): void => {
         expect(data).toStrictEqual(apiSchemaList.list.mock["list.success"].data());
     });
     service2.list({
         config: {
             mock: 'list.fail',
         },
-    }).catch((data) => {
+    }).catch((data): void => {
         expect(data).toBe(apiSchemaList.list.mock["list.fail"].data);
     });
     service2.$list({
         config: {
             mock: 'list.success',
         },
-    }).then((data) => {
+    }).then((data): void => {
         expect(data).toStrictEqual(apiSchemaList.list.mock["list.success"].data());
     });
 });

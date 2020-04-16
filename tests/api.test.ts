@@ -1,4 +1,4 @@
 import '../src/api';
-test(`no test`, () => {
+test(`no test`, (): void => {
     expect(true).toBe(true);
 })
