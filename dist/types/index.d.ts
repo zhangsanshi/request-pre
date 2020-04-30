@@ -1,16 +1,13 @@
 import { ApiSchemaList, ServiceConfig } from './api';
-declare type requestReturn = Promise<unknown>;
-declare type requester = ({ config: ApiSchemaConfig, mock: ApiSchemaMock, url: UrlSchema, }: {
-    config: any;
-    mock: any;
-    url: any;
-}) => requestReturn;
+import { requester, middleware } from './util/request';
 declare class Service {
     constructor(apiSchemaList: ApiSchemaList, serviceConfig: ServiceConfig, requester: requester);
     [prop: string]: any;
     private apiSchemaList;
     private requester;
     private serviceConfig;
+    middlewareList: middleware[];
+    use(middleware: middleware): Service;
     private createRequest;
     private initService;
 }

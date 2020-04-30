@@ -2,7 +2,7 @@ import { ApiSchema, ApiSchemaData, ServiceConfig } from '../api';
 import methods from '../methods';
 import { resolvePath } from './utils';
 const bodyMethods = [methods.PATCH, methods.POST, methods.PUT];
-export default function mixins(serviceConfig: ServiceConfig, apiSchema: ApiSchema, requestObj: ApiSchemaData): ApiSchema {
+export default function mixin(serviceConfig: ServiceConfig, apiSchema: ApiSchema, requestObj: ApiSchemaData): ApiSchema {
     const apiSchemaURL = apiSchema.url;
     requestObj = requestObj || {};
     serviceConfig = serviceConfig || {};

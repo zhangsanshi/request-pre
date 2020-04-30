@@ -8,7 +8,8 @@
     "coverage": "jest --coverage",
     "lint": "eslint src --fix --ext .ts",
     "lib": "tsc",
-    "dev": "tsc -w"
+    "dev": "tsc -w",
+    "prepublishOnly": "npm run lib && git add ."
   },
   "main": "dist/lib/index.js",
   "module": "dist/lib/index.js",

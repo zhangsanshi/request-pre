@@ -13,7 +13,7 @@ const apiSchemaList = {
         mock: {
             'list.success': {
                 success: true,
-                data: () => [],
+                data: (): any[] => [],
             },
             'list.fail': {
                 success: false,
@@ -40,7 +40,7 @@ const serviceConfig = {
         'Content-Type': 'application/x-www-form-urlencoded'
     },
 };
-const service = new Service(apiSchemaList, serviceConfig, function ({ config, url, mock }): Promise<any> {
+const service = new Service(apiSchemaList, serviceConfig, function ({ config, url, mock }): Promise<object> {
     return Promise.resolve({
         config, url, mock
     });
@@ -49,7 +49,59 @@ const path =  serviceConfig.prefix + apiSchemaList.detail.url.path;
 test('instanceof Service', (): void => {
     expect(service instanceof Service).toBe(true);
 });
+test('middleware', (): void => {
+    const service = new Service(apiSchemaList, {}, function ({ config, url, mock }): Promise<object> {
+        return Promise.resolve({
+            config, url, mock
+        });
+    });
+    service.list({
+        config: {
+            mock: 'list.success',
+        },
+    }).then((data): void => {
+        expect(data.url.headers['Content-Type']).toStrictEqual('application/json;charset=UTF-8');
+    });
 
+    const service2 = new Service(apiSchemaList, {
+        headers: {
+            'Content-Type': 'application/json;charset=UTF-8'
+        },
+    }, function ({ config, url, mock }): Promise<object> {
+        return Promise.resolve({
+            config, url, mock
+        });
+    });
+    service2.list({
+        config: {
+            mock: 'list.success',
+            requestType: 'form',
+        },
+    }).then((data): void => {
+        expect(data.url.headers['Content-Type']).toStrictEqual('application/x-www-form-urlencoded;charset=UTF-8');
+    });
+});
+test('custom middleware', (): void => {
+    const service = new Service(apiSchemaList, {
+        config: {
+            custom: 'addHeader',
+        },
+    }, function ({ config, url, mock }): Promise<object> {
+        return Promise.resolve({
+            config, url, mock
+        });
+    });
+    service.use(async function (apiSchema, next): Promise<any> {
+        if (apiSchema.config.custom === 'addHeader') {
+            const headers = apiSchema.url.headers = apiSchema.url.headers || {};
+            headers.addHeader = 'addHeader';
+        }
+        return await next();
+    });
+    service.list().then((data): void => {
+        expect(data.url.headers['addHeader']).toStrictEqual('addHeader');
+    });
+});
 test('process.env.NODE_ENV=development & mock', (): void => {
     process.env.NODE_ENV = 'development';
     service.list({
@@ -101,9 +153,8 @@ test('process.env.NODE_ENV=production', (): void => {
         });
     });
 });
-
 test('reset request method', (): void => {
-    service.list = function (...args) {
+    service.list = function (...args): Promise<object> {
         return service.$list(...args);
     };
     service.list({

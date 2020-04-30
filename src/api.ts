@@ -1,14 +1,23 @@
 import methods from './methods';
 interface DefaultData {
-    [key: string]: unknown;
+    [key: string]: any;
 }
 interface ApiSchemaConfig extends DefaultData {
     mock?: string;
+    requestType?: string;
+    // todo
+    cache?: {
+        key?: string;
+        max?: number;
+        expire?: number;
+    };
+    cancel?: boolean;
+    timeout?: number;
 }
 interface ApiSchemaMock {
     [key: string]: {
         success: boolean;
-        data: unknown;
+        data: any;
     };
 }
 interface UrlSchema {

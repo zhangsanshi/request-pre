@@ -1,37 +1,45 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var mixins_1 = require("./util/mixins");
+var mixin_1 = require("./util/mixin");
+var mock_1 = require("./util/mock");
+var compose_1 = require("./util/compose");
+var requestType_1 = require("./middleware/requestType");
 var Service = /** @class */ (function () {
     function Service(apiSchemaList, serviceConfig, requester) {
         this.serviceConfig = serviceConfig;
         this.apiSchemaList = apiSchemaList;
         this.requester = requester;
+        this.middlewareList = [
+            requestType_1.default,
+        ];
         return this.initService();
     }
-    Service.prototype.createRequest = function (apiName, target) {
+    Service.prototype.use = function (middleware) {
+        this.middlewareList.push(middleware);
+        return this;
+    };
+    Service.prototype.createRequest = function (apiName, target, middlewareWrap) {
         return function (requestObj) {
-            var requestInfo = mixins_1.default(target.serviceConfig, target.apiSchemaList[apiName], requestObj);
-            var config = requestInfo.config, mock = requestInfo.mock;
-            var mockStatus = config && config.mock;
-            var mockInfo = mockStatus && mock && mock[mockStatus];
-            if (process.env.NODE_ENV === 'development') {
-                if (mockInfo) {
-                    console.log(requestInfo);
-                    return new Promise(function (res, rej) {
-                        var action = mockInfo.success ? res : rej;
-                        action(typeof mockInfo.data === 'function' ? mockInfo.data(config) : mockInfo.data);
-                    });
+            var requestInfo = mixin_1.default(target.serviceConfig, target.apiSchemaList[apiName], requestObj);
+            return middlewareWrap(requestInfo, function (ctx) {
+                var request = null;
+                if (process.env.NODE_ENV === 'development') {
+                    request = mock_1.default(ctx);
                 }
-            }
-            return target.requester(requestInfo);
+                if (!request) {
+                    request = target.requester(ctx);
+                }
+                return request;
+            });
         };
     };
     Service.prototype.initService = function () {
         var _this = this;
         var apiSchemaList = this.apiSchemaList;
+        var middlewareWrap = compose_1.default(this.middlewareList);
         if (typeof Proxy === 'undefined') {
             Object.keys(apiSchemaList).forEach(function (apiName) {
-                _this[apiName] = _this['$' + apiName] = _this.createRequest(apiName, _this);
+                _this[apiName] = _this['$' + apiName] = _this.createRequest(apiName, _this, middlewareWrap);
             });
             return this;
         }
@@ -45,7 +53,7 @@ var Service = /** @class */ (function () {
                         propertyKey = propertyKey.substring(1);
                     }
                     if (propertyKey in target.apiSchemaList) {
-                        return target.createRequest(propertyKey, target);
+                        return target.createRequest(propertyKey, target, middlewareWrap);
                     }
                 },
                 set: function (target, propertyKey, value, receiver) {
