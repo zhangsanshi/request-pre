@@ -1,4 +1,4 @@
-import { ApiSchemaConfig } from './api';
+import { ApiSchemaConfig, ApiSchema } from './api';
 export const SKIP_NEXT = {};
 export const SKIP_REQUEST = {};
 export type serviceConfig = Map<string, Function | {
@@ -28,7 +28,7 @@ function getConfig(config: ApiSchemaConfig, configMap: serviceConfig, defaultPri
         let resolve;
         let reject;
         if (handler) {
-            resolve = ('resolve' in handler) ? handler?.resolve : handler;
+            resolve = ('resolve' in handler) ? handler?.resolve : (typeof handler === 'function' ? handler : undefined);
             reject = ('reject' in handler) ? handler.reject : undefined;
         }
         return {
@@ -39,17 +39,17 @@ function getConfig(config: ApiSchemaConfig, configMap: serviceConfig, defaultPri
     });
 }
 export default {
-    async pre(config: ApiSchemaConfig, configMap: serviceConfig, initData: any): Promise<any> {
+    async pre(config: ApiSchemaConfig, configMap: serviceConfig, initData: any, ctx: ApiSchema): Promise<any> {
         if (config) {
             return getConfig(config, configMap, 50).reduce((pre: Promise<any>, configHandler: ConfigHandler): Promise<any> => {
                 return pre.then((prevData: any): void => {
                     if (configHandler.resolve) {
-                        return configHandler.resolve(initData, configHandler.params, prevData);
+                        return configHandler.resolve(ctx, configHandler.params, prevData);
                     }
                     return prevData;
                 }, (error): any => {
                     if (configHandler.reject) {
-                        return configHandler.reject(initData, configHandler.params, error);
+                        return configHandler.reject(ctx, configHandler.params, error);
                     }
                     return Promise.reject(error);
                 });
@@ -57,21 +57,21 @@ export default {
         }
         return initData;
     },
-    async post(config: ApiSchemaConfig, configMap: serviceConfig, initData: Promise<any>): Promise<any> {
+    async post(config: ApiSchemaConfig, configMap: serviceConfig, initData: Promise<any>, ctx: ApiSchema): Promise<any> {
         if (config) {
             return getConfig(config, configMap, 50).reduce((pre: Promise<any>, configHandler: ConfigHandler): Promise<any> => {
                 return pre.then((prevData: any): void => {
                     if (configHandler.resolve) {
-                        return configHandler.resolve(prevData, configHandler.params, initData);
+                        return configHandler.resolve(prevData, configHandler.params, ctx);
                     }
                     return prevData;
                 }, (error): any => {
                     if (configHandler.reject) {
-                        return configHandler.reject(error, configHandler.params, initData);
+                        return configHandler.reject(error, configHandler.params, ctx);
                     }
                     return Promise.reject(error);
                 });
-            }, Promise.resolve(initData));
+            }, initData);
         }
         return initData;
     }

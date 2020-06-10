@@ -39,7 +39,7 @@ class Service {
             const requestInfo = mixin(target.serviceConfig, target.apiSchemaList[apiName], requestObj);
             return middlewareWrap(requestInfo, (ctx: ApiSchema): requestReturn => {
                 const { config } = ctx;
-                let request = runConfig.pre(config, target.preConfig, ctx) || Promise.resolve(ctx);
+                let request = runConfig.pre(config, target.preConfig, Promise.resolve(ctx), ctx) || Promise.resolve(ctx);
                 
                 request = request.then((): Promise<any> => {
                     if (process.env.NODE_ENV === 'development') {
@@ -50,7 +50,7 @@ class Service {
                     }
                     return target.requester(ctx);
                 });
-                return runConfig.post(config, target.postConfig, request);
+                return runConfig.post(config, target.postConfig, request, ctx);
             });
         };
     }

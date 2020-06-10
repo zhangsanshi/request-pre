@@ -30,7 +30,7 @@ var Service = /** @class */ (function () {
             var requestInfo = mixin_1.default(target.serviceConfig, target.apiSchemaList[apiName], requestObj);
             return middlewareWrap(requestInfo, function (ctx) {
                 var config = ctx.config;
-                var request = config_1.default.pre(config, target.preConfig, ctx) || Promise.resolve(ctx);
+                var request = config_1.default.pre(config, target.preConfig, Promise.resolve(ctx), ctx) || Promise.resolve(ctx);
                 request = request.then(function () {
                     if (process.env.NODE_ENV === 'development') {
                         var mockData = mock_1.default(ctx);
@@ -40,7 +40,7 @@ var Service = /** @class */ (function () {
                     }
                     return target.requester(ctx);
                 });
-                return config_1.default.post(config, target.postConfig, request);
+                return config_1.default.post(config, target.postConfig, request, ctx);
             });
         };
     };

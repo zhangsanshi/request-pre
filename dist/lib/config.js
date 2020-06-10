@@ -57,7 +57,7 @@ function getConfig(config, configMap, defaultPriority) {
         var resolve;
         var reject;
         if (handler) {
-            resolve = ('resolve' in handler) ? handler === null || handler === void 0 ? void 0 : handler.resolve : handler;
+            resolve = ('resolve' in handler) ? handler === null || handler === void 0 ? void 0 : handler.resolve : (typeof handler === 'function' ? handler : undefined);
             reject = ('reject' in handler) ? handler.reject : undefined;
         }
         return {
@@ -68,19 +68,19 @@ function getConfig(config, configMap, defaultPriority) {
     });
 }
 exports.default = {
-    pre: function (config, configMap, initData) {
+    pre: function (config, configMap, initData, ctx) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 if (config) {
                     return [2 /*return*/, getConfig(config, configMap, 50).reduce(function (pre, configHandler) {
                             return pre.then(function (prevData) {
                                 if (configHandler.resolve) {
-                                    return configHandler.resolve(initData, configHandler.params, prevData);
+                                    return configHandler.resolve(ctx, configHandler.params, prevData);
                                 }
                                 return prevData;
                             }, function (error) {
                                 if (configHandler.reject) {
-                                    return configHandler.reject(initData, configHandler.params, error);
+                                    return configHandler.reject(ctx, configHandler.params, error);
                                 }
                                 return Promise.reject(error);
                             });
@@ -90,23 +90,23 @@ exports.default = {
             });
         });
     },
-    post: function (config, configMap, initData) {
+    post: function (config, configMap, initData, ctx) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 if (config) {
                     return [2 /*return*/, getConfig(config, configMap, 50).reduce(function (pre, configHandler) {
                             return pre.then(function (prevData) {
                                 if (configHandler.resolve) {
-                                    return configHandler.resolve(prevData, configHandler.params, initData);
+                                    return configHandler.resolve(prevData, configHandler.params, ctx);
                                 }
                                 return prevData;
                             }, function (error) {
                                 if (configHandler.reject) {
-                                    return configHandler.reject(error, configHandler.params, initData);
+                                    return configHandler.reject(error, configHandler.params, ctx);
                                 }
                                 return Promise.reject(error);
                             });
-                        }, Promise.resolve(initData))];
+                        }, initData)];
                 }
                 return [2 /*return*/, initData];
             });
