@@ -17,6 +17,12 @@ caseBase({
         requestObj: {},
     },
     output: {
+        config: {
+            "priority": {
+                preprocess: 100,
+                postprocess: 0,
+            },
+        },
         url: {},
     },
 });
@@ -71,6 +77,10 @@ caseBase({
             },
         },
         config: {
+            "priority": {
+                preprocess: 100,
+                postprocess: 0,
+            },
             mock: 'listSuccess',
             other: 'anyway',
         },
@@ -107,6 +117,12 @@ caseBase({
         },
     },
     output: {
+        config: {
+            "priority": {
+                preprocess: 100,
+                postprocess: 0,
+            },
+        },
         url: {
             path: '/domain/a/b/1',
             method: 'GET',
@@ -144,6 +160,12 @@ caseBase({
         },
     },
     output: {
+        config: {
+            "priority": {
+                preprocess: 100,
+                postprocess: 0,
+            },
+        },
         url: {
             path: '/domain/a/b/1',
             method: 'POST',
@@ -184,6 +206,12 @@ caseBase({
         },
     },
     output: {
+        config: {
+            "priority": {
+                preprocess: 100,
+                postprocess: 0,
+            },
+        },
         url: {
             path: '/domain/a/b/1',
             method: 'POST',
@@ -223,6 +251,12 @@ caseBase({
         requestObj: {},
     },
     output: {
+        config: {
+            "priority": {
+                preprocess: 100,
+                postprocess: 0,
+            },
+        },
         url: {
             path: '/domain/a/b',
             method: 'POST',

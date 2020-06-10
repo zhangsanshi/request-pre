@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "module": "commonjs",
-    "lib": ["es7"],
+    "target": "ES5",
+    "module": "CommonJS",
+    "lib": ["ES7"],
     "declaration": true,
     "declarationDir": "dist/types",
     "outDir": "dist/lib",

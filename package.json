@@ -23,15 +23,15 @@
   "author": "zhangsanshi",
   "license": "MIT",
   "devDependencies": {
-    "@types/jest": "^25.2.1",
+    "@types/jest": "^25.2.3",
     "@typescript-eslint/eslint-plugin": "^1.13.0",
     "@typescript-eslint/parser": "^1.13.0",
-    "eslint": "^6.1.0",
+    "eslint": "^6.8.0",
     "husky": "^3.0.1",
-    "jest": "^25.3.0",
+    "jest": "^25.5.4",
     "lint-staged": "^9.2.0",
-    "ts-jest": "^25.3.1",
-    "typescript": "^3.5.3"
+    "ts-jest": "^25.5.1",
+    "typescript": "^3.9.5"
   },
   "husky": {
     "hooks": {
@@ -41,8 +41,7 @@
   "lint-staged": {
     "{src,test}/**/*.ts": [
       "eslint --fix",
-      "npm run test",
-      "npm run lib",
+      "npm run test -- --passWithNoTests",
       "git add"
     ]
   },

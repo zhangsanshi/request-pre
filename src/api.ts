@@ -2,7 +2,7 @@ import methods from './methods';
 interface DefaultData {
     [key: string]: any;
 }
-interface ApiSchemaConfig extends DefaultData {
+export interface ApiSchemaConfig extends DefaultData {
     mock?: string;
     requestType?: string;
     // todo
@@ -13,6 +13,9 @@ interface ApiSchemaConfig extends DefaultData {
     };
     cancel?: boolean;
     timeout?: number;
+    priority?: {
+        [prop: string]: number;
+    };
 }
 interface ApiSchemaMock {
     [key: string]: {

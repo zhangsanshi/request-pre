@@ -12,13 +12,23 @@ export default function mixin(serviceConfig: ServiceConfig, apiSchema: ApiSchema
     const apiSchemaInfo: ApiSchema = {
         url: apiSchemaURLInfo,
     };
-    if (serviceConfig.config || apiSchema.config || requestObj.config) {
-        apiSchemaInfo.config = {
-            ...serviceConfig.config,
-            ...apiSchema.config,
-            ...requestObj.config,
-        };
-    }
+    const priority = {
+        ...({
+            preprocess: 100,
+            postprocess: 0,
+        }),
+        ...serviceConfig?.config?.priority,
+        ...apiSchema?.config?.priority,
+        ...requestObj?.config?.priority,
+    };
+    apiSchemaInfo.config = {
+        ...serviceConfig?.config,
+        ...apiSchema?.config,
+        ...requestObj?.config,
+        ...({
+            priority,
+        })
+    };
     if (apiSchema.mock || requestObj.mock) {
         apiSchemaInfo.mock = apiSchema.mock;
     }

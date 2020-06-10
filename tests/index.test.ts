@@ -205,3 +205,88 @@ test('[no Proxy]process.env.NODE_ENV=development & mock', (): void => {
         expect(data).toStrictEqual(apiSchemaList.list.mock["list.success"].data());
     });
 });
+
+
+test('preprocess', (): void => {
+    const service = new Service(apiSchemaList, {}, function ({ config, url, mock }): Promise<object> {
+        return Promise.resolve({
+            config, url, mock
+        });
+    });
+    service.list({
+        config: {
+            preprocess(requestInfo): void {
+                requestInfo.url.headers.xxxx = 'aaaa';
+            },
+        },
+    }).then((data): void => {
+        expect(data.url.headers.xxxx).toStrictEqual('aaaa');
+    });
+});
+
+test('postprocess', (): void => {
+    const service = new Service(apiSchemaList, {}, function ({ config, url, mock }): Promise<object> {
+        return Promise.resolve({
+            config, url, mock
+        });
+    });
+    service.list({
+        config: {
+            postprocess(): number {
+                return 1;
+            },
+        },
+    }).then((data): void => {
+        expect(data).toStrictEqual(1);
+    });
+});
+
+test('custom config', (): void => {
+    let p = false;
+    const service = new Service(apiSchemaList, {}, function ({ config, url, mock }): Promise<object> {
+        p = !p;
+        return p ? Promise.resolve({
+            config, url, mock
+        }): Promise.reject({
+            config, url, mock
+        });
+    });
+    service.postConfig.set('xxx', {
+        resolve(): any {
+            return {a:2};
+        },
+        reject(): any {
+            return {a:4};
+        }
+    });
+    service.list({
+        config: {
+            xxx: true,
+        },
+    }).then((data): void => {
+        expect(data).toStrictEqual({a:2});
+    });
+    service.list({
+        config: {
+            xxx: true,
+        },
+    }).then((data): void => {
+        expect(data).toStrictEqual({a:4});
+    });
+    service.list({
+        config: {
+            mock: 'list.fail',
+            xxx: true,
+        },
+    }).then((data): void => {
+        expect(data).toStrictEqual({a:4});
+    });
+    service.list({
+        config: {
+            mock: 'list.success',
+            xxx: true,
+        },
+    }).then((data): void => {
+        expect(data).toStrictEqual({a:2});
+    });
+});
