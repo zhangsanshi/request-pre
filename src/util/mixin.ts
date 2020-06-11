@@ -15,7 +15,7 @@ export default function mixin(serviceConfig: ServiceConfig, apiSchema: ApiSchema
     const priority = {
         ...({
             preprocess: 100,
-            postprocess: 0,
+            postprocess: 100,
         }),
         ...serviceConfig?.config?.priority,
         ...apiSchema?.config?.priority,

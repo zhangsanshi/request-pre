@@ -25,7 +25,7 @@ function mixin(serviceConfig, apiSchema, requestObj) {
     };
     var priority = __assign(__assign(__assign(__assign({}, ({
         preprocess: 100,
-        postprocess: 0,
+        postprocess: 100,
     })), (_a = serviceConfig === null || serviceConfig === void 0 ? void 0 : serviceConfig.config) === null || _a === void 0 ? void 0 : _a.priority), (_b = apiSchema === null || apiSchema === void 0 ? void 0 : apiSchema.config) === null || _b === void 0 ? void 0 : _b.priority), (_c = requestObj === null || requestObj === void 0 ? void 0 : requestObj.config) === null || _c === void 0 ? void 0 : _c.priority);
     apiSchemaInfo.config = __assign(__assign(__assign(__assign({}, serviceConfig === null || serviceConfig === void 0 ? void 0 : serviceConfig.config), apiSchema === null || apiSchema === void 0 ? void 0 : apiSchema.config), requestObj === null || requestObj === void 0 ? void 0 : requestObj.config), ({
         priority: priority,

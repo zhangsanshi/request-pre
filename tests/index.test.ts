@@ -289,4 +289,16 @@ test('custom config', (): void => {
     }).then((data): void => {
         expect(data).toStrictEqual({a:2});
     });
+
+    service.list({
+        config: {
+            mock: 'list.success',
+            xxx: true,
+            postprocess() {
+                return 1;
+            },
+        },
+    }).then((data): void => {
+        expect(data).toStrictEqual(1);
+    });
 });

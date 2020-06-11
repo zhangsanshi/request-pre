@@ -20,7 +20,7 @@ caseBase({
         config: {
             "priority": {
                 preprocess: 100,
-                postprocess: 0,
+                postprocess: 100,
             },
         },
         url: {},
@@ -79,7 +79,7 @@ caseBase({
         config: {
             "priority": {
                 preprocess: 100,
-                postprocess: 0,
+                postprocess: 100,
             },
             mock: 'listSuccess',
             other: 'anyway',
@@ -120,7 +120,7 @@ caseBase({
         config: {
             "priority": {
                 preprocess: 100,
-                postprocess: 0,
+                postprocess: 100,
             },
         },
         url: {
@@ -163,7 +163,7 @@ caseBase({
         config: {
             "priority": {
                 preprocess: 100,
-                postprocess: 0,
+                postprocess: 100,
             },
         },
         url: {
@@ -209,7 +209,7 @@ caseBase({
         config: {
             "priority": {
                 preprocess: 100,
-                postprocess: 0,
+                postprocess: 100,
             },
         },
         url: {
@@ -254,7 +254,7 @@ caseBase({
         config: {
             "priority": {
                 preprocess: 100,
-                postprocess: 0,
+                postprocess: 100,
             },
         },
         url: {
