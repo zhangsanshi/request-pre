@@ -8,10 +8,15 @@ import postprocess from './config/postprocess';
 import { requestReturn, createRequestReturn, requester, middleware } from './util/request';
 import requestType from './middleware/requestType';
 
+type API<T> = {
+    [prop in keyof T]: createRequestReturn;
+};
+interface APIDynamic {
+    [prop: string]: any;
+}
 class Service {
-    public constructor(apiSchemaList: ApiSchemaList, serviceConfig: ServiceConfig, requester: requester) {
+    public constructor(serviceConfig: ServiceConfig, requester: requester) {
         this.serviceConfig = serviceConfig;
-        this.apiSchemaList = apiSchemaList;
         this.requester = requester;
         this.preConfig = new Map();
         this.postConfig = new Map();
@@ -20,11 +25,9 @@ class Service {
         ];
         this.preConfig.set('preprocess', preprocess);
         this.postConfig.set('postprocess', postprocess);
-        return this.initService();
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [prop: string]: any;
-    private apiSchemaList: ApiSchemaList;
     public preConfig: serviceConfig;
     public postConfig: serviceConfig;
     private requester: requester;
@@ -34,14 +37,14 @@ class Service {
         this.middlewareList.push(middleware);
         return this;
     }
-    private createRequest(apiName: string, target: Service, middlewareWrap): createRequestReturn {
+    private createRequest(apiName: string, target: Service, middlewareWrap, apiSchemaList: ApiSchemaList): createRequestReturn {
         return function(requestObj: ApiSchemaData): requestReturn {
-            const requestInfo = mixin(target.serviceConfig, target.apiSchemaList[apiName], requestObj);
+            const requestInfo = mixin(target.serviceConfig, apiSchemaList[apiName], requestObj);
             return middlewareWrap(requestInfo, (ctx: ApiSchema): requestReturn => {
                 const { config } = ctx;
-                let request = runConfig.pre(config, target.preConfig, Promise.resolve(ctx), ctx) || Promise.resolve(ctx);
+                let request = runConfig.pre(config, target.preConfig, Promise.resolve(ctx), ctx);
                 
-                request = request.then((): Promise<any> => {
+                request = request.then((): requestReturn => {
                     if (process.env.NODE_ENV === 'development') {
                         const mockData = mock(ctx);
                         if (mockData) {
@@ -54,29 +57,32 @@ class Service {
             });
         };
     }
-    private initService(): Service {
-        const { apiSchemaList } = this;
+    public generator<T extends ApiSchemaList, U extends APIDynamic>(apiSchemaList: T, dynamicServices?: U): API<T> & U & APIDynamic {
         const middlewareWrap = compose(this.middlewareList);
+        const services = Object.create(null);
+        if (dynamicServices) {
+            Object.keys(dynamicServices).forEach((key): void => {
+                services[key] = dynamicServices[key];
+            });
+        }
+        const self = this;
         if (typeof Proxy === 'undefined') {
             Object.keys(apiSchemaList).forEach((apiName): void => {
-                this[apiName] = this['$' + apiName] = this.createRequest(apiName, this, middlewareWrap);
+                services[apiName] = this.createRequest(apiName, this, middlewareWrap, apiSchemaList);
             });
-            return this;
+            return services as API<T> & U & APIDynamic;
         } else {
-            return new Proxy(this, {
-                get(target: Service, propertyKey: string): createRequestReturn | any {
+            return new Proxy(services, {
+                get(target, propertyKey: string): createRequestReturn {
                     if (propertyKey in target) {
                         return target[propertyKey];
                     }
-                    if (propertyKey.startsWith('$')) {
-                        propertyKey = propertyKey.substring(1);
-                    }
-                    if (propertyKey in target.apiSchemaList) {
-                        return target.createRequest(propertyKey, target, middlewareWrap);
+                    if (propertyKey in apiSchemaList) {
+                        return self.createRequest(propertyKey, self, middlewareWrap, apiSchemaList);
                     }
                 },
-                set(target: Service, propertyKey: string, value: any, receiver: object): boolean {
-                    if (propertyKey.startsWith('$') && apiSchemaList[propertyKey.substring(1)]) {
+                set(target, propertyKey: string, value, receiver: object): boolean {
+                    if (propertyKey in apiSchemaList) {
                         if (process.env.NODE_ENV === 'development')
                             console.error(`can not set property ${propertyKey}`);
                         return false;
@@ -84,7 +90,7 @@ class Service {
                         return Reflect.set(target, propertyKey, value, receiver);
                     }
                 },
-            });
+            }) as API<T> & U & APIDynamic;
         }
     }
 }

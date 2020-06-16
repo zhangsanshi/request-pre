@@ -8,9 +8,8 @@ var preprocess_1 = require("./config/preprocess");
 var postprocess_1 = require("./config/postprocess");
 var requestType_1 = require("./middleware/requestType");
 var Service = /** @class */ (function () {
-    function Service(apiSchemaList, serviceConfig, requester) {
+    function Service(serviceConfig, requester) {
         this.serviceConfig = serviceConfig;
-        this.apiSchemaList = apiSchemaList;
         this.requester = requester;
         this.preConfig = new Map();
         this.postConfig = new Map();
@@ -19,18 +18,17 @@ var Service = /** @class */ (function () {
         ];
         this.preConfig.set('preprocess', preprocess_1.default);
         this.postConfig.set('postprocess', postprocess_1.default);
-        return this.initService();
     }
     Service.prototype.use = function (middleware) {
         this.middlewareList.push(middleware);
         return this;
     };
-    Service.prototype.createRequest = function (apiName, target, middlewareWrap) {
+    Service.prototype.createRequest = function (apiName, target, middlewareWrap, apiSchemaList) {
         return function (requestObj) {
-            var requestInfo = mixin_1.default(target.serviceConfig, target.apiSchemaList[apiName], requestObj);
+            var requestInfo = mixin_1.default(target.serviceConfig, apiSchemaList[apiName], requestObj);
             return middlewareWrap(requestInfo, function (ctx) {
                 var config = ctx.config;
-                var request = config_1.default.pre(config, target.preConfig, Promise.resolve(ctx), ctx) || Promise.resolve(ctx);
+                var request = config_1.default.pre(config, target.preConfig, Promise.resolve(ctx), ctx);
                 request = request.then(function () {
                     if (process.env.NODE_ENV === 'development') {
                         var mockData = mock_1.default(ctx);
@@ -44,31 +42,34 @@ var Service = /** @class */ (function () {
             });
         };
     };
-    Service.prototype.initService = function () {
+    Service.prototype.generator = function (apiSchemaList, dynamicServices) {
         var _this = this;
-        var apiSchemaList = this.apiSchemaList;
         var middlewareWrap = compose_1.default(this.middlewareList);
+        var services = Object.create(null);
+        if (dynamicServices) {
+            Object.keys(dynamicServices).forEach(function (key) {
+                services[key] = dynamicServices[key];
+            });
+        }
+        var self = this;
         if (typeof Proxy === 'undefined') {
             Object.keys(apiSchemaList).forEach(function (apiName) {
-                _this[apiName] = _this['$' + apiName] = _this.createRequest(apiName, _this, middlewareWrap);
+                services[apiName] = _this.createRequest(apiName, _this, middlewareWrap, apiSchemaList);
             });
-            return this;
+            return services;
         }
         else {
-            return new Proxy(this, {
+            return new Proxy(services, {
                 get: function (target, propertyKey) {
                     if (propertyKey in target) {
                         return target[propertyKey];
                     }
-                    if (propertyKey.startsWith('$')) {
-                        propertyKey = propertyKey.substring(1);
-                    }
-                    if (propertyKey in target.apiSchemaList) {
-                        return target.createRequest(propertyKey, target, middlewareWrap);
+                    if (propertyKey in apiSchemaList) {
+                        return self.createRequest(propertyKey, self, middlewareWrap, apiSchemaList);
                     }
                 },
                 set: function (target, propertyKey, value, receiver) {
-                    if (propertyKey.startsWith('$') && apiSchemaList[propertyKey.substring(1)]) {
+                    if (propertyKey in apiSchemaList) {
                         if (process.env.NODE_ENV === 'development')
                             console.error("can not set property " + propertyKey);
                         return false;

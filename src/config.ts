@@ -1,4 +1,5 @@
 import { ApiSchemaConfig, ApiSchema } from './api';
+import { requestReturn } from './util/request';
 export const SKIP_NEXT = {};
 export const SKIP_REQUEST = {};
 export type serviceConfig = Map<string, Function | {
@@ -57,15 +58,15 @@ export default {
         }
         return initData;
     },
-    async post(config: ApiSchemaConfig, configMap: serviceConfig, initData: Promise<any>, ctx: ApiSchema): Promise<any> {
+    async post(config: ApiSchemaConfig, configMap: serviceConfig, initData: requestReturn, ctx: ApiSchema): Promise<any> {
         if (config) {
-            return getConfig(config, configMap, 50).reduce((pre: Promise<any>, configHandler: ConfigHandler): Promise<any> => {
-                return pre.then((prevData: any): void => {
+            return getConfig(config, configMap, 50).reduce((pre: requestReturn, configHandler: ConfigHandler): requestReturn => {
+                return pre.then((prevData: any): requestReturn => {
                     if (configHandler.resolve) {
                         return configHandler.resolve(prevData, configHandler.params, ctx);
                     }
                     return prevData;
-                }, (error): any => {
+                }, (error): requestReturn => {
                     if (configHandler.reject) {
                         return configHandler.reject(error, configHandler.params, ctx);
                     }

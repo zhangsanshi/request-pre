@@ -1,6 +1,5 @@
 import Service from '../src/index';
 import methods from '../src/methods';
-
 const apiSchemaList = {
     list: {
         url: {
@@ -40,96 +39,68 @@ const serviceConfig = {
         'Content-Type': 'application/x-www-form-urlencoded'
     },
 };
-const service = new Service(apiSchemaList, serviceConfig, function ({ config, url, mock }): Promise<object> {
+const serviceWithDynamic = new Service(serviceConfig, function ({ config, url, mock }): Promise<object> {
     return Promise.resolve({
         config, url, mock
     });
+}).generator(apiSchemaList, {
+    listAll(): number {
+        return 1;
+    }
 });
-const path =  serviceConfig.prefix + apiSchemaList.detail.url.path;
+const serviceWithoutDynamic = new Service(serviceConfig, function ({ config, url, mock }): Promise<any> {
+    return Promise.resolve({
+        config, url, mock
+    });
+}).generator(apiSchemaList);
+const path = serviceConfig.prefix + apiSchemaList.detail.url.path;
 test('instanceof Service', (): void => {
-    expect(service instanceof Service).toBe(true);
+    expect(serviceWithDynamic instanceof Service).toBe(false);
 });
-test('middleware', (): void => {
-    const service = new Service(apiSchemaList, {}, function ({ config, url, mock }): Promise<object> {
-        return Promise.resolve({
-            config, url, mock
-        });
-    });
-    service.list({
-        config: {
-            mock: 'list.success',
-        },
-    }).then((data): void => {
-        expect(data.url.headers['Content-Type']).toStrictEqual('application/json;charset=UTF-8');
-    });
-
-    const service2 = new Service(apiSchemaList, {
-        headers: {
-            'Content-Type': 'application/json;charset=UTF-8'
-        },
-    }, function ({ config, url, mock }): Promise<object> {
-        return Promise.resolve({
-            config, url, mock
-        });
-    });
-    service2.list({
-        config: {
-            mock: 'list.success',
-            requestType: 'form',
-        },
-    }).then((data): void => {
-        expect(data.url.headers['Content-Type']).toStrictEqual('application/x-www-form-urlencoded;charset=UTF-8');
-    });
+test('custom add property', (): void => {
+    expect((): void => {
+        serviceWithDynamic.customProperty = 1;
+    }).not.toThrow();
+    expect((): void => {
+        serviceWithoutDynamic.customProperty = 1;
+    }).not.toThrow();
 });
-test('custom middleware', (): void => {
-    const service = new Service(apiSchemaList, {
-        config: {
-            custom: 'addHeader',
-        },
-    }, function ({ config, url, mock }): Promise<object> {
-        return Promise.resolve({
-            config, url, mock
-        });
-    });
-    service.use(async function (apiSchema, next): Promise<any> {
-        if (apiSchema.config.custom === 'addHeader') {
-            const headers = apiSchema.url.headers = apiSchema.url.headers || {};
-            headers.addHeader = 'addHeader';
+test('run dynamic method', (): void => {
+    expect(serviceWithDynamic.listAll()).toBe(1);
+});
+test('set Service method', (): void => {
+    expect((): void => {
+        serviceWithDynamic.list = function (): Promise<any> {
+            return Promise.resolve(1);
         }
-        return await next();
-    });
-    service.list().then((data): void => {
-        expect(data.url.headers['addHeader']).toStrictEqual('addHeader');
-    });
+    }).toThrow(TypeError);
+    expect((): void => {
+        serviceWithDynamic.listAll = function (): number {
+            return 2;
+        }
+    }).not.toThrow();
 });
 test('process.env.NODE_ENV=development & mock', (): void => {
     process.env.NODE_ENV = 'development';
-    service.list({
+    serviceWithDynamic.list({
         config: {
             mock: 'list.success',
         },
     }).then((data): void => {
         expect(data).toStrictEqual(apiSchemaList.list.mock["list.success"].data());
     });
-    service.list({
+    serviceWithDynamic.list({
         config: {
             mock: 'list.fail',
         },
     }).catch((data): void => {
         expect(data).toBe(apiSchemaList.list.mock["list.fail"].data);
     });
-    service.$list({
-        config: {
-            mock: 'list.success',
-        },
-    }).then((data): void => {
-        expect(data).toStrictEqual(apiSchemaList.list.mock["list.success"].data());
-    });
 });
 
 test('process.env.NODE_ENV=production', (): void => {
     process.env.NODE_ENV = 'production';
-    service.list({
+    serviceWithDynamic.list({
         config: {
             mock: 'list.success',
         },
@@ -141,7 +112,7 @@ test('process.env.NODE_ENV=production', (): void => {
             path,
         }).toStrictEqual(url);
     });
-    service.detail({
+    serviceWithDynamic.detail({
         config: {
             mock: 'list.success',
         },
@@ -153,152 +124,22 @@ test('process.env.NODE_ENV=production', (): void => {
         });
     });
 });
-test('reset request method', (): void => {
-    service.list = function (...args): Promise<object> {
-        return service.$list(...args);
-    };
-    service.list({
-        config: {
-            mock: 'list.success',
-        },
-    }).then(({ config, url, mock }): void => {
-        expect(mock).toStrictEqual(apiSchemaList.list.mock);
-        expect({
-            ...apiSchemaList.list.url,
-            headers: serviceConfig.headers,
-            path,
-        }).toStrictEqual(url);
-    });
-    expect((): void => {
-        service.$list = 'test';
-    }).toThrow();
-});
-
 
 test('[no Proxy]process.env.NODE_ENV=development & mock', (): void => {
     Proxy = undefined;
-    const service2 = new Service(apiSchemaList, serviceConfig, function ({ config, url, mock }): Promise<any> {
-        return Promise.resolve({
-            config, url, mock
-        });
-    });
     process.env.NODE_ENV = 'development';
-    service2.list({
+    serviceWithoutDynamic.list({
         config: {
             mock: 'list.success',
         },
     }).then((data): void => {
         expect(data).toStrictEqual(apiSchemaList.list.mock["list.success"].data());
     });
-    service2.list({
+    serviceWithoutDynamic.list({
         config: {
             mock: 'list.fail',
         },
     }).catch((data): void => {
         expect(data).toBe(apiSchemaList.list.mock["list.fail"].data);
-    });
-    service2.$list({
-        config: {
-            mock: 'list.success',
-        },
-    }).then((data): void => {
-        expect(data).toStrictEqual(apiSchemaList.list.mock["list.success"].data());
-    });
-});
-
-
-test('preprocess', (): void => {
-    const service = new Service(apiSchemaList, {}, function ({ config, url, mock }): Promise<object> {
-        return Promise.resolve({
-            config, url, mock
-        });
-    });
-    service.list({
-        config: {
-            preprocess(requestInfo): void {
-                requestInfo.url.headers.xxxx = 'aaaa';
-            },
-        },
-    }).then((data): void => {
-        expect(data.url.headers.xxxx).toStrictEqual('aaaa');
-    });
-});
-
-test('postprocess', (): void => {
-    const service = new Service(apiSchemaList, {}, function ({ config, url, mock }): Promise<object> {
-        return Promise.resolve({
-            config, url, mock
-        });
-    });
-    service.list({
-        config: {
-            postprocess(): number {
-                return 1;
-            },
-        },
-    }).then((data): void => {
-        expect(data).toStrictEqual(1);
-    });
-});
-
-test('custom config', (): void => {
-    let p = false;
-    const service = new Service(apiSchemaList, {}, function ({ config, url, mock }): Promise<object> {
-        p = !p;
-        return p ? Promise.resolve({
-            config, url, mock
-        }): Promise.reject({
-            config, url, mock
-        });
-    });
-    service.postConfig.set('xxx', {
-        resolve(): any {
-            return {a:2};
-        },
-        reject(): any {
-            return {a:4};
-        }
-    });
-    service.list({
-        config: {
-            xxx: true,
-        },
-    }).then((data): void => {
-        expect(data).toStrictEqual({a:2});
-    });
-    service.list({
-        config: {
-            xxx: true,
-        },
-    }).then((data): void => {
-        expect(data).toStrictEqual({a:4});
-    });
-    service.list({
-        config: {
-            mock: 'list.fail',
-            xxx: true,
-        },
-    }).then((data): void => {
-        expect(data).toStrictEqual({a:4});
-    });
-    service.list({
-        config: {
-            mock: 'list.success',
-            xxx: true,
-        },
-    }).then((data): void => {
-        expect(data).toStrictEqual({a:2});
-    });
-
-    service.list({
-        config: {
-            mock: 'list.success',
-            xxx: true,
-            postprocess() {
-                return 1;
-            },
-        },
-    }).then((data): void => {
-        expect(data).toStrictEqual(1);
     });
 });

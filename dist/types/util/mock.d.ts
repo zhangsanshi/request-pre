@@ -1,2 +1,3 @@
 import { ApiSchema } from '../api';
-export default function addMock(requestInfo: ApiSchema): Promise<any> | void;
+import { requestReturn } from '../util/request';
+export default function addMock(requestInfo: ApiSchema): requestReturn | void;

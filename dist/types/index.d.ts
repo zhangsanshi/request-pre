@@ -1,10 +1,15 @@
 import { ApiSchemaList, ServiceConfig } from './api';
 import { serviceConfig } from './config';
-import { requester, middleware } from './util/request';
-declare class Service {
-    constructor(apiSchemaList: ApiSchemaList, serviceConfig: ServiceConfig, requester: requester);
+import { createRequestReturn, requester, middleware } from './util/request';
+declare type API<T> = {
+    [prop in keyof T]: createRequestReturn;
+};
+interface APIDynamic {
     [prop: string]: any;
-    private apiSchemaList;
+}
+declare class Service {
+    constructor(serviceConfig: ServiceConfig, requester: requester);
+    [prop: string]: any;
     preConfig: serviceConfig;
     postConfig: serviceConfig;
     private requester;
@@ -12,6 +17,6 @@ declare class Service {
     middlewareList: middleware[];
     use(middleware: middleware): Service;
     private createRequest;
-    private initService;
+    generator<T extends ApiSchemaList, U extends APIDynamic>(apiSchemaList: T, dynamicServices?: U): API<T> & U & APIDynamic;
 }
 export default Service;
