@@ -1,4 +1,4 @@
 import { ApiSchema } from '../api';
-export default function postprocess(requestInfo: ApiSchema, postprocessFunc): any {
-    return postprocessFunc(requestInfo);
+export default function postprocess(prevData: any, postprocessFunc, requestInfo: ApiSchema): any {
+    return postprocessFunc(prevData, requestInfo);
 }

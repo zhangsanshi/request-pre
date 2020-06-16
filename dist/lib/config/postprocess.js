@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-function postprocess(requestInfo, postprocessFunc) {
-    return postprocessFunc(requestInfo);
+function postprocess(prevData, postprocessFunc, requestInfo) {
+    return postprocessFunc(prevData, requestInfo);
 }
 exports.default = postprocess;
