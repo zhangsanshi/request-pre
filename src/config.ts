@@ -2,7 +2,7 @@ import { ApiSchemaConfig, ApiSchema } from './api';
 import { requestReturn } from './util/request';
 export const SKIP_NEXT = {};
 export const SKIP_REQUEST = {};
-export type serviceConfig = Map<string, Function | {
+export type apiConfig = Map<string, Function | {
     resolve?: Function;
     reject?: Function;
 }>;
@@ -11,7 +11,7 @@ interface ConfigHandler {
     resolve?: Function;
     reject?: Function;
 }
-function getConfig(config: ApiSchemaConfig, configMap: serviceConfig, defaultPriority: number): ApiSchemaConfig {
+function getConfig(config: ApiSchemaConfig, configMap: apiConfig, defaultPriority: number): ApiSchemaConfig {
     const priority = config.priority;
     let targetConfig = Object.keys(config).filter((configName): boolean => {
         return configName !== 'priority' && configMap.has(configName);
@@ -40,7 +40,7 @@ function getConfig(config: ApiSchemaConfig, configMap: serviceConfig, defaultPri
     });
 }
 export default {
-    async pre(config: ApiSchemaConfig, configMap: serviceConfig, initData: any, ctx: ApiSchema): Promise<any> {
+    async pre(config: ApiSchemaConfig, configMap: apiConfig, initData: any, ctx: ApiSchema): Promise<any> {
         if (config) {
             return getConfig(config, configMap, 50).reduce((pre: Promise<any>, configHandler: ConfigHandler): Promise<any> => {
                 return pre.then((prevData: any): void => {
@@ -58,7 +58,7 @@ export default {
         }
         return initData;
     },
-    async post(config: ApiSchemaConfig, configMap: serviceConfig, initData: requestReturn, ctx: ApiSchema): Promise<any> {
+    async post(config: ApiSchemaConfig, configMap: apiConfig, initData: requestReturn, ctx: ApiSchema): Promise<any> {
         if (config) {
             return getConfig(config, configMap, 50).reduce((pre: requestReturn, configHandler: ConfigHandler): requestReturn => {
                 return pre.then((prevData: any): requestReturn => {

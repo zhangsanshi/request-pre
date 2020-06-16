@@ -8,8 +8,7 @@ var preprocess_1 = require("./config/preprocess");
 var postprocess_1 = require("./config/postprocess");
 var requestType_1 = require("./middleware/requestType");
 var Service = /** @class */ (function () {
-    function Service(serviceConfig, requester) {
-        this.serviceConfig = serviceConfig;
+    function Service(requester) {
         this.requester = requester;
         this.preConfig = new Map();
         this.postConfig = new Map();
@@ -23,9 +22,9 @@ var Service = /** @class */ (function () {
         this.middlewareList.push(middleware);
         return this;
     };
-    Service.prototype.createRequest = function (apiName, target, middlewareWrap, apiSchemaList) {
+    Service.prototype.createRequest = function (apiName, target, middlewareWrap, apiSchemaList, serviceConfig) {
         return function (requestObj) {
-            var requestInfo = mixin_1.default(target.serviceConfig, apiSchemaList[apiName], requestObj);
+            var requestInfo = mixin_1.default(serviceConfig, apiSchemaList[apiName], requestObj);
             return middlewareWrap(requestInfo, function (ctx) {
                 var config = ctx.config;
                 var request = config_1.default.pre(config, target.preConfig, Promise.resolve(ctx), ctx);
@@ -42,7 +41,7 @@ var Service = /** @class */ (function () {
             });
         };
     };
-    Service.prototype.generator = function (apiSchemaList, dynamicServices) {
+    Service.prototype.generator = function (apiSchemaList, dynamicServices, serviceConfig) {
         var _this = this;
         var middlewareWrap = compose_1.default(this.middlewareList);
         var services = Object.create(null);
@@ -54,7 +53,7 @@ var Service = /** @class */ (function () {
         var self = this;
         if (typeof Proxy === 'undefined') {
             Object.keys(apiSchemaList).forEach(function (apiName) {
-                services[apiName] = _this.createRequest(apiName, _this, middlewareWrap, apiSchemaList);
+                services[apiName] = _this.createRequest(apiName, _this, middlewareWrap, apiSchemaList, serviceConfig);
             });
             return services;
         }
@@ -65,7 +64,7 @@ var Service = /** @class */ (function () {
                         return target[propertyKey];
                     }
                     if (propertyKey in apiSchemaList) {
-                        return self.createRequest(propertyKey, self, middlewareWrap, apiSchemaList);
+                        return self.createRequest(propertyKey, self, middlewareWrap, apiSchemaList, serviceConfig);
                     }
                 },
                 set: function (target, propertyKey, value, receiver) {

@@ -44,7 +44,7 @@ const apiSchemaList = {
 };
 
 test('preprocess', (): void => {
-    const service = new Service({}, function ({ config, url, mock }): Promise<object> {
+    const service = new Service(function ({ config, url, mock }): Promise<object> {
         return Promise.resolve({
             config, url, mock
         });
@@ -61,7 +61,7 @@ test('preprocess', (): void => {
 });
 
 test('postprocess', (): void => {
-    const service = new Service({}, function ({ config, url, mock }): Promise<object> {
+    const service = new Service(function ({ config, url, mock }): Promise<object> {
         return Promise.resolve({
             config, url, mock
         });
@@ -78,7 +78,7 @@ test('postprocess', (): void => {
 });
 
 test('custom post config', (): void => {
-    const serviceGenerator = new Service({}, function ({ config, url, mock }): Promise<object> {
+    const serviceGenerator = new Service(function ({ config, url, mock }): Promise<object> {
         return Promise.resolve({
             config, url, mock
         });
@@ -157,7 +157,7 @@ test('custom post config', (): void => {
 });
 test('custom pre config', (): void => {
 
-    const serviceGenerator = new Service({}, function ({ config, url, mock }): Promise<object> {
+    const serviceGenerator = new Service(function ({ config, url, mock }): Promise<object> {
         return Promise.resolve({
             config, url, mock
         });

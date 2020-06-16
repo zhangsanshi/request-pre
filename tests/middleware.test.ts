@@ -34,7 +34,7 @@ const apiSchemaList = {
     },
 };
 test('middleware', (): void => {
-    const service = new Service({}, function ({ config, url, mock }): Promise<object> {
+    const service = new Service(function ({ config, url, mock }): Promise<object> {
         return Promise.resolve({
             config, url, mock
         });
@@ -47,15 +47,15 @@ test('middleware', (): void => {
         expect(data.url.headers['Content-Type']).toStrictEqual('application/json;charset=UTF-8');
     });
 
-    const service2 = new Service({
-        headers: {
-            'Content-Type': 'application/json;charset=UTF-8'
-        },
-    }, function ({ config, url, mock }): Promise<object> {
+    const service2 = new Service(function ({ config, url, mock }): Promise<object> {
         return Promise.resolve({
             config, url, mock
         });
-    }).generator(apiSchemaList);
+    }).generator(apiSchemaList, null, {
+        headers: {
+            'Content-Type': 'application/json;charset=UTF-8'
+        },
+    });
     service2.list({
         config: {
             mock: 'list.success',
@@ -66,16 +66,16 @@ test('middleware', (): void => {
     });
 });
 test('custom middleware', (): void => {
-    const serviceGenerator = new Service( {
-        config: {
-            custom: 'addHeader',
-        },
-    }, function ({ config, url, mock }): Promise<object> {
+    const serviceGenerator = new Service(function ({ config, url, mock }): Promise<object> {
         return Promise.resolve({
             config, url, mock
         });
     });
-    const service = serviceGenerator.generator(apiSchemaList);
+    const service = serviceGenerator.generator(apiSchemaList, null, {
+        config: {
+            custom: 'addHeader',
+        },
+    });
     serviceGenerator.use(async function (apiSchema, next): Promise<any> {
         if (apiSchema.config.custom === 'addHeader') {
             const headers = apiSchema.url.headers = apiSchema.url.headers || {};

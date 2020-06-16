@@ -1,7 +1,7 @@
 import { ApiSchemaList, ApiSchemaData, ServiceConfig, ApiSchema } from './api';
 import mixin from './util/mixin';
 import compose  from './util/compose';
-import runConfig, { serviceConfig }  from './config';
+import runConfig, { apiConfig }  from './config';
 import mock from './util/mock';
 import preprocess from './config/preprocess';
 import postprocess from './config/postprocess';
@@ -15,8 +15,7 @@ interface APIDynamic {
     [prop: string]: any;
 }
 class Service {
-    public constructor(serviceConfig: ServiceConfig, requester: requester) {
-        this.serviceConfig = serviceConfig;
+    public constructor(requester: requester) {
         this.requester = requester;
         this.preConfig = new Map();
         this.postConfig = new Map();
@@ -28,18 +27,17 @@ class Service {
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [prop: string]: any;
-    public preConfig: serviceConfig;
-    public postConfig: serviceConfig;
+    public preConfig: apiConfig;
+    public postConfig: apiConfig;
     private requester: requester;
-    private serviceConfig: ServiceConfig;
     public middlewareList: middleware[];
     public use(middleware: middleware): Service {
         this.middlewareList.push(middleware);
         return this;
     }
-    private createRequest(apiName: string, target: Service, middlewareWrap, apiSchemaList: ApiSchemaList): createRequestReturn {
+    private createRequest(apiName: string, target: Service, middlewareWrap, apiSchemaList: ApiSchemaList, serviceConfig: ServiceConfig): createRequestReturn {
         return function(requestObj: ApiSchemaData): requestReturn {
-            const requestInfo = mixin(target.serviceConfig, apiSchemaList[apiName], requestObj);
+            const requestInfo = mixin(serviceConfig, apiSchemaList[apiName], requestObj);
             return middlewareWrap(requestInfo, (ctx: ApiSchema): requestReturn => {
                 const { config } = ctx;
                 let request = runConfig.pre(config, target.preConfig, Promise.resolve(ctx), ctx);
@@ -57,7 +55,7 @@ class Service {
             });
         };
     }
-    public generator<T extends ApiSchemaList, U extends APIDynamic>(apiSchemaList: T, dynamicServices?: U): API<T> & U & APIDynamic {
+    public generator<T extends ApiSchemaList, U extends APIDynamic>(apiSchemaList: T, dynamicServices?: U, serviceConfig?: ServiceConfig): API<T> & U & APIDynamic {
         const middlewareWrap = compose(this.middlewareList);
         const services = Object.create(null);
         if (dynamicServices) {
@@ -68,7 +66,7 @@ class Service {
         const self = this;
         if (typeof Proxy === 'undefined') {
             Object.keys(apiSchemaList).forEach((apiName): void => {
-                services[apiName] = this.createRequest(apiName, this, middlewareWrap, apiSchemaList);
+                services[apiName] = this.createRequest(apiName, this, middlewareWrap, apiSchemaList, serviceConfig);
             });
             return services as API<T> & U & APIDynamic;
         } else {
@@ -78,7 +76,7 @@ class Service {
                         return target[propertyKey];
                     }
                     if (propertyKey in apiSchemaList) {
-                        return self.createRequest(propertyKey, self, middlewareWrap, apiSchemaList);
+                        return self.createRequest(propertyKey, self, middlewareWrap, apiSchemaList, serviceConfig);
                     }
                 },
                 set(target, propertyKey: string, value, receiver: object): boolean {

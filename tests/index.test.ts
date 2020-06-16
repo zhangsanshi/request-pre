@@ -39,7 +39,7 @@ const serviceConfig = {
         'Content-Type': 'application/x-www-form-urlencoded'
     },
 };
-const serviceWithDynamic = new Service(serviceConfig, function ({ config, url, mock }): Promise<object> {
+const serviceWithDynamic = new Service(function ({ config, url, mock }): Promise<object> {
     return Promise.resolve({
         config, url, mock
     });
@@ -47,12 +47,12 @@ const serviceWithDynamic = new Service(serviceConfig, function ({ config, url, m
     listAll(): number {
         return 1;
     }
-});
-const serviceWithoutDynamic = new Service(serviceConfig, function ({ config, url, mock }): Promise<any> {
+}, serviceConfig);
+const serviceWithoutDynamic = new Service(function ({ config, url, mock }): Promise<any> {
     return Promise.resolve({
         config, url, mock
     });
-}).generator(apiSchemaList);
+}).generator(apiSchemaList, null, serviceConfig);
 const path = serviceConfig.prefix + apiSchemaList.detail.url.path;
 test('instanceof Service', (): void => {
     expect(serviceWithDynamic instanceof Service).toBe(false);
