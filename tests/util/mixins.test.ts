@@ -228,6 +228,98 @@ caseBase({
     },
 });
 
+
+caseBase({
+    input: {
+        serviceConfig: {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            prefix: '/domain',
+        },
+        apiSchema: {
+            url: {
+                path: '/a/b/{id}',
+                method: 'POST',
+                query: {
+                    a: 1,
+                },
+            },
+        },
+        requestObj: {
+            path: {
+                id: 1,
+            },
+            body: [1,2,3],
+        },
+    },
+    output: {
+        config: {
+            "priority": {
+                preprocess: 100,
+                postprocess: 100,
+            },
+        },
+        url: {
+            path: '/domain/a/b/1',
+            method: 'POST',
+            query: {
+                a: 1,
+            },
+            body: [1,2,3],
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+        },
+    },
+});
+
+
+caseBase({
+    input: {
+        serviceConfig: {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            prefix: '/domain',
+        },
+        apiSchema: {
+            url: {
+                path: '/a/b/{id}',
+                method: 'POST',
+                query: {
+                    a: 1,
+                },
+            },
+        },
+        requestObj: {
+            path: {
+                id: 1,
+            },
+            body: 233,
+        },
+    },
+    output: {
+        config: {
+            "priority": {
+                preprocess: 100,
+                postprocess: 100,
+            },
+        },
+        url: {
+            path: '/domain/a/b/1',
+            method: 'POST',
+            query: {
+                a: 1,
+            },
+            body: 233,
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+        },
+    },
+});
+
 caseBase({
     input: {
         serviceConfig: {

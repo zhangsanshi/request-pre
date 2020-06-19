@@ -40,7 +40,12 @@ function mixin(serviceConfig, apiSchema, requestObj) {
         apiSchemaURLInfo.path = serviceConfig.prefix + apiSchemaURLInfo.path;
     }
     if ((apiSchemaURL.body || requestObj.body)) {
-        apiSchemaURLInfo.body = __assign(__assign({}, apiSchemaURL.body), requestObj.body);
+        if (utils_1.isObject(apiSchemaURL.body) || utils_1.isObject(requestObj.body)) {
+            apiSchemaURLInfo.body = __assign(__assign({}, apiSchemaURL.body), requestObj.body);
+        }
+        else {
+            apiSchemaURLInfo.body = apiSchemaURL.body || requestObj.body;
+        }
         if (process.env.NODE_ENV === 'development') {
             if (!bodyMethods.includes(apiSchemaURLInfo.method)) {
                 console.warn('HTTP methods like post,patch,put require a body.');

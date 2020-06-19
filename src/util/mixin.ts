@@ -1,6 +1,6 @@
 import { ApiSchema, ApiSchemaData, ServiceConfig } from '../api';
 import methods from '../methods';
-import { resolvePath } from './utils';
+import { resolvePath, isObject } from './utils';
 const bodyMethods = [methods.PATCH, methods.POST, methods.PUT];
 export default function mixin(serviceConfig: ServiceConfig, apiSchema: ApiSchema, requestObj: ApiSchemaData): ApiSchema {
     const apiSchemaURL = apiSchema.url;
@@ -39,10 +39,15 @@ export default function mixin(serviceConfig: ServiceConfig, apiSchema: ApiSchema
         apiSchemaURLInfo.path = serviceConfig.prefix + apiSchemaURLInfo.path;
     }
     if ((apiSchemaURL.body || requestObj.body)) {
-        apiSchemaURLInfo.body = {
-            ...apiSchemaURL.body, 
-            ...requestObj.body,
-        };
+
+        if (isObject(apiSchemaURL.body) || isObject(requestObj.body)) {
+            apiSchemaURLInfo.body = {
+                ...apiSchemaURL.body, 
+                ...requestObj.body,
+            };
+        } else {
+            apiSchemaURLInfo.body = apiSchemaURL.body || requestObj.body;
+        }
         if (process.env.NODE_ENV === 'development') {
             if (!bodyMethods.includes(apiSchemaURLInfo.method)) {
                 console.warn('HTTP methods like post,patch,put require a body.');

@@ -24,7 +24,7 @@ interface ApiSchemaMock {
 }
 interface UrlSchema {
     query?: DefaultData;
-    body?: DefaultData;
+    body?: any;
     headers?: DefaultData;
     method: methods;
     path: string;
